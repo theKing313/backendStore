@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+model User {
+  id        Int       @id @default(autoincrement())
+  email     String    @unique
+  username  String
+  password  String
+  createdAt DateTime  @default(now())
+  isVerified Boolean   @default(false)
+  orders    Order[]
+  token     Token?
+}
+
+model Token {
+  id           String @id @default(uuid())
+  refreshToken String
+  userId       Int    @unique
+  user         User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Order {
+  id            String      @id @default(cuid())
+  orderNumber   Int         @unique
+  timestamp     DateTime
+  userName      String
+  userPhone     String
+  userAddress   String
+  paymentType   String?
+  orderType     String?
+  cardNumber    String?
+  cardExpiry    String?
+  cardCvv       String?
+  cardHolder    String?
+  totalPrice    Float
+  totalWeight   Float
+  totalDiscount Float
+  totalQuantity Int
+  cart          OrderItem[]
+  createdAt     DateTime    @default(now())
+  user          User        @relation(fields: [userId], references: [id])
+  userId        Int
+}
+
+model OrderItem {
+  id               Int     @id @default(autoincrement())
+  order            Order   @relation(fields: [orderId], references: [id])
+  orderId          String
+  productId        String
+  name             String
+  quantity         Int
+  price            Float
+  totalPrice       Float
+  weight           Float
+  totalWeight      Float
+  selectedMaterial String?
+  selectedSize     String?
+  selectedColor    String?
+  discountedPrice  Float?
+  discount         Int?
+  profit           Float?
+}
+
+model Review {
+  id         Int      @id @default(autoincrement())
+  productId  String
+  username   String
+  rating     Int
+  comment    String
+  createdAt  DateTime @default(now())
+}
