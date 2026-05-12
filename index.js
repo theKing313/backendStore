@@ -14,11 +14,16 @@ import { swaggerSpec } from "./swagger.js";
 const app = express();
 const port = 5044;
 
-app.use(cors({ exposedHeaders: ["captcha-token"] }));
+// app.use(cors({ exposedHeaders: ["captcha-token"] }));
 app.use(express.json());
 // export const prisma = new PrismaClient();
 const captchaStore = new Map(); // token -> captchaText
-
+app.use(
+  cors({
+    origin: "https://shop-store-78eh.vercel.app",
+    credentials: true,
+  }),
+);
 // 🟡 1. Генерация капчи
 // app.get("/api/captcha", (req, res) => {
 //   const captcha = svgCaptcha.create({
