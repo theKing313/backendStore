@@ -87,15 +87,24 @@ class UserService {
 
     if (!existingUser) {
       throw new Error("Пользователь с таким email не найден");
+      return {
+        success: false,
+        message: "Пользователь с таким email не найден",
+      };
     }
 
     const code = generateCode();
-    resetCodes.set(email, code);
+    // resetCodes.set(email, code);
+    const hashPassword = await bcrypt.hash(code, 3);
+    await this.prisma.user.update({
+      where: { email },
+      data: { password: hashPassword },
+    });
 
     const result = await mailService.sendCode(email, code);
     return {
       ...result,
-      message: "Код для восстановления пароля отправлен на email",
+      message: `Новый пароль отправлен на ваш email : ${email}`,
     };
   }
 

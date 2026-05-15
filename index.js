@@ -20,7 +20,7 @@ app.use(express.json());
 const captchaStore = new Map(); // token -> captchaText
 app.use(
   cors({
-    origin: "https://shop-store-78eh.vercel.app",
+    origin: ["https://shop-store-78eh.vercel.app", "http://localhost:3000"],
     credentials: true,
   }),
 );
