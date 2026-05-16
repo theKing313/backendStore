@@ -15,15 +15,16 @@ const app = express();
 const port = 5044;
 
 // app.use(cors({ exposedHeaders: ["captcha-token"] }));
-app.use(express.json());
+
 // export const prisma = new PrismaClient();
 const captchaStore = new Map(); // token -> captchaText
 app.use(
   cors({
-    origin: ["https://shop-store-78eh.vercel.app", "http://localhost:3000"],
+    origin: ["http://localhost:3000", "https://shop-store-dzjw.vercel.app"],
     credentials: true,
   }),
 );
+app.use(express.json());
 // 🟡 1. Генерация капчи
 // app.get("/api/captcha", (req, res) => {
 //   const captcha = svgCaptcha.create({
