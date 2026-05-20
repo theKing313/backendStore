@@ -78,9 +78,53 @@ model OrderItem {
 
 model Review {
   id         Int      @id @default(autoincrement())
+  product    Product  @relation(fields: [productId], references: [id])
   productId  String
   username   String
   rating     Int
   comment    String
   createdAt  DateTime @default(now())
+}
+
+model Brand {
+  id          String    @id
+  name        String
+  url         String?
+  description String?
+  products    Product[]
+}
+
+model Category {
+  id       String    @id
+  name     String
+  url      String
+  products Product[]
+}
+
+model Gender {
+  id       String    @id
+  name     String
+  url      String
+  products Product[]
+}
+
+model Product {
+  id              String    @id
+  name            String
+  description     String
+  image           String
+  price           Float
+  weight          Float
+  sizes           String[]
+  materials       String[]
+  colors          String[]
+  discountPercent Int?
+  discountedPrice Float?
+  category        Category  @relation(fields: [categoryId], references: [id])
+  categoryId      String
+  brand           Brand     @relation(fields: [brandId], references: [id])
+  brandId         String
+  gender          Gender    @relation(fields: [genderId], references: [id])
+  genderId        String
+  reviews         Review[]
 }

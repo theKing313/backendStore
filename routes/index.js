@@ -2,7 +2,9 @@ import express from "express";
 import { userController } from "../controllers/userController.js";
 import { orderController } from "../controllers/orderController.js";
 import { reviewController } from "../controllers/reviewController.js";
+import { productController } from "../controllers/productController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
+import { prisma } from "../prisma.js";
 
 const router = express.Router();
 /**
@@ -66,6 +68,42 @@ router.post("/login", userController.login);
  *         description: Данные пользователя
  */
 router.get("/user", authMiddleware, userController.find);
+
+router.get("/products", productController.getAll);
+router.get("/products/:id", productController.getById);
+router.post("/products", productController.create);
+router.put("/products/:id", productController.update);
+router.delete("/products/:id", productController.delete);
+
+router.get("/brands", async (req, res) => {
+  try {
+    const brands = await prisma.brand.findMany();
+    return res.json(brands);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to fetch brands" });
+  }
+});
+
+router.get("/categories", async (req, res) => {
+  try {
+    const categories = await prisma.category.findMany();
+    return res.json(categories);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to fetch categories" });
+  }
+});
+
+router.get("/genders", async (req, res) => {
+  try {
+    const genders = await prisma.gender.findMany();
+    return res.json(genders);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to fetch genders" });
+  }
+});
 
 /**
  * @swagger
