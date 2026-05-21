@@ -22,7 +22,11 @@ const port = 5044;
 const captchaStore = new Map(); // token -> captchaText
 app.use(
   cors({
-    origin: ["http://localhost:3000", "https://shop-store-dzjw.vercel.app"],
+    origin: [
+      "http://localhost:3000",
+      "https://shop-store-dzjw.vercel.app",
+      "https://shop-store-six-eosin.vercel.app",
+    ],
     credentials: true,
   }),
 );

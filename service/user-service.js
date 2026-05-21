@@ -87,57 +87,55 @@ class UserService {
 
     if (!existingUser) {
       throw new Error("Пользователь с таким email не найден");
-      return {
-        success: false,
-        message: "Пользователь с таким email не найден",
-      };
     }
 
     const code = generateCode();
-    // resetCodes.set(email, code);
-    const hashPassword = await bcrypt.hash(code, 3);
-    await this.prisma.user.update({
-      where: { email },
-      data: { password: hashPassword },
-    });
+    resetCodes.set(email, code);
 
     const result = await mailService.sendCode(email, code);
     return {
       ...result,
-      message: `Новый пароль отправлен на ваш email : ${email}`,
+      message: `Код для восстановления пароля отправлен на email: ${email}`,
     };
   }
 
-  async resetPassword({ email, code, password }) {
-    if (!email || !code || !password) {
-      throw new Error("Email, code и новый пароль обязательны");
+  async resetPassword({ email }) {
+    //, code, password
+    try {
+      console.log("[UserService] resetPassword called", { email });
+      if (!email) {
+        //|| !code || !password
+        throw new Error("Email, code и новый пароль обязательны");
+      }
+      const code = generateCode();
+
+      // const savedCode = resetCodes.get(email);
+      // if (!savedCode || savedCode !== code) {
+      //   throw new Error("Неверный код для сброса пароля");
+      // }
+
+      const user = await this.prisma.user.findUnique({
+        where: { email },
+      });
+
+      if (!user) {
+        throw new Error("Пользователь с таким email не найден");
+      }
+      const hashPassword = await bcrypt.hash(code, 3);
+      await this.prisma.user.update({
+        where: { email },
+        data: { password: hashPassword },
+      });
+
+      resetCodes.delete(email);
+      const result = await mailService.sendCode(email, code);
+      return { message: "Пароль успешно обновлён", resend: result };
+    } catch (error) {
+      console.error("[UserService] resetPassword error", error);
+      throw error;
     }
-
-    const savedCode = resetCodes.get(email);
-    if (!savedCode || savedCode !== code) {
-      throw new Error("Неверный код для сброса пароля");
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { email },
-    });
-
-    if (!user) {
-      throw new Error("Пользователь с таким email не найден");
-    }
-
-    const hashPassword = await bcrypt.hash(password, 3);
-    await this.prisma.user.update({
-      where: { email },
-      data: { password: hashPassword },
-    });
-
-    resetCodes.delete(email);
-
-    return { message: "Пароль успешно обновлён" };
   }
 
-  // твоя старая регистрация (можешь оставить)
   async registration(username, password, email) {
     if (!username || !password || !email) {
       throw new Error("Username, email and password are required");
@@ -151,11 +149,25 @@ class UserService {
       throw new Error("Email already registered");
     }
 
-    console.log("[UserService] registration start", { username, email });
-    const sendResult = await this.sendCode(email);
-    console.log("[UserService] registration sendCode result", sendResult);
+    const hashPassword = await bcrypt.hash(password, 3);
+    const user = await this.prisma.user.create({
+      data: {
+        email,
+        username,
+        password: hashPassword,
+        isVerified: true,
+      },
+    });
 
-    return { message: "Код подтверждения отправлен на email", sendResult };
+    const tokens = tokenService.generateTokens({ ...user });
+    await tokenService.saveToken(user.id, tokens.refreshToken);
+
+    return {
+      user,
+      token: tokens,
+      success: true,
+      message: "Регистрация прошла успешно",
+    };
   }
   async login(emailOrUsername, password) {
     if (!emailOrUsername || !password) {
