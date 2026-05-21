@@ -69,10 +69,135 @@ router.post("/login", userController.login);
  */
 router.get("/user", authMiddleware, userController.find);
 
+/**
+ * @swagger
+ * /api/products:
+ *   get:
+ *     summary: Получение списка продуктов
+ *     tags: [Products]
+ *     responses:
+ *       200:
+ *         description: Список товаров
+ */
 router.get("/products", productController.getAll);
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   get:
+ *     summary: Получение товара по ID
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Данные товара
+ */
 router.get("/products/:id", productController.getById);
+
+/**
+ * @swagger
+ * /api/products:
+ *   post:
+ *     summary: Создание нового товара
+ *     tags: [Products]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               image:
+ *                 type: string
+ *               categoryId:
+ *                 type: string
+ *               brandId:
+ *                 type: string
+ *               genderId:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               discountPercent:
+ *                 type: number
+ *               discountedPrice:
+ *                 type: number
+ *             required:
+ *               - name
+ *               - price
+ *     responses:
+ *       200:
+ *         description: Товар создан
+ */
 router.post("/products", productController.create);
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   put:
+ *     summary: Обновление товара
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               price:
+ *                 type: number
+ *               image:
+ *                 type: string
+ *               categoryId:
+ *                 type: string
+ *               brandId:
+ *                 type: string
+ *               genderId:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               discountPercent:
+ *                 type: number
+ *               discountedPrice:
+ *                 type: number
+ *     responses:
+ *       200:
+ *         description: Товар обновлён
+ */
 router.put("/products/:id", productController.update);
+
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   delete:
+ *     summary: Удаление товара
+ *     tags: [Products]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Товар удалён
+ */
 router.delete("/products/:id", productController.delete);
 
 router.get("/brands", async (req, res) => {
