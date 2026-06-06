@@ -20,6 +20,23 @@ class OrderController {
       return res.status(500).json({ message: error.message });
     }
   }
+
+  async updateStatus(req, res) {
+    try {
+      const { id } = req.params;
+      const { status } = req.body;
+
+      if (!status) {
+        return res.status(400).json({ message: "Status is required" });
+      }
+
+      const order = await orderService.updateOrderStatus(id, status);
+      return res.json(order);
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ message: error.message });
+    }
+  }
 }
 
 export const orderController = new OrderController();

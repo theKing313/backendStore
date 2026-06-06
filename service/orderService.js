@@ -104,6 +104,33 @@ class OrderService {
       timestamp: order.timestamp.getTime(),
     }));
   }
+
+  async updateOrderStatus(orderId, status) {
+    const validStatuses = [
+      "PENDING",
+      "PROCESSING",
+      "SHIPPED",
+      "DELIVERED",
+      "CANCELLED",
+    ];
+
+    if (!validStatuses.includes(status)) {
+      throw new Error(
+        `Invalid status. Must be one of: ${validStatuses.join(", ")}`,
+      );
+    }
+
+    const updatedOrder = await prisma.order.update({
+      where: { id: orderId },
+      data: { status },
+      include: { cart: true },
+    });
+
+    return {
+      ...updatedOrder,
+      timestamp: updatedOrder.timestamp.getTime(),
+    };
+  }
 }
 
 export const orderService = new OrderService();

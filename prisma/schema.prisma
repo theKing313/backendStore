@@ -12,6 +12,15 @@ datasource db {
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
 // datasource db {
 //   provider = "postgresql"
 //   url      = env("DATABASE_URL")
@@ -51,6 +60,7 @@ model Order {
   totalWeight   Float
   totalDiscount Float
   totalQuantity Int
+  status        OrderStatus @default(PENDING)
   cart          OrderItem[]
   createdAt     DateTime    @default(now())
   user          User        @relation(fields: [userId], references: [id])
