@@ -1,5 +1,6 @@
 import bcrypt from "bcrypt";
 import { prisma } from "../prisma.js";
+import { createPayment } from "./paymentService.js";
 
 class OrderService {
   async createOrder(orderData) {
@@ -59,6 +60,39 @@ class OrderService {
         totalWeight,
         totalDiscount,
         totalQuantity,
+        metadata: {
+          order: {
+            orderNumber,
+            paymentType,
+            orderType,
+            totalPrice,
+            totalWeight,
+            totalDiscount,
+            totalQuantity,
+            cart: cart.map((item) => ({
+              productId: item.productId,
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+              totalPrice: item.totalPrice,
+              weight: item.weight,
+              selectedMaterial: item.selectedMaterial,
+              selectedSize: item.selectedSize,
+              selectedColor: item.selectedColor,
+            })),
+          },
+          user: {
+            userId: userId || null,
+            userName,
+            userPhone,
+            userAddress,
+            cardHolder,
+            cardExpiry,
+            cardNumber: cardNumber
+              ? cardNumber.replace(/.(?=.{4})/g, "*")
+              : null,
+          },
+        },
         user: userConnect,
         cart: {
           create: cart.map((item) => ({
@@ -81,9 +115,20 @@ class OrderService {
       include: { cart: true },
     });
 
+    let paymentUrl = null;
+    if (paymentType === "card") {
+      const payment = await createPayment({
+        ...orderData,
+        orderNumber,
+        cart,
+      });
+      paymentUrl = payment?.confirmation?.confirmation_url;
+    }
+
     return {
       ...createdOrder,
       timestamp: createdOrder.timestamp.getTime(),
+      paymentUrl,
     };
   }
 

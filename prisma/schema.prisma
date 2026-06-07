@@ -56,6 +56,7 @@ model Order {
   cardExpiry    String?
   cardCvv       String?
   cardHolder    String?
+  metadata      Json?
   totalPrice    Float
   totalWeight   Float
   totalDiscount Float
