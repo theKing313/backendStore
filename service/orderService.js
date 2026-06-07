@@ -80,50 +80,9 @@ class OrderService {
           totalWeight,
           totalDiscount,
           totalQuantity,
-          metadata: {
-            order: {
-              orderNumber,
-              paymentType,
-              orderType,
-              totalPrice,
-              totalWeight,
-              totalDiscount,
-              totalQuantity,
-              cart: cart.map((item) => ({
-                productId: item.productId,
-                name: item.name,
-                quantity: item.quantity,
-                price: item.price,
-                totalPrice: item.totalPrice,
-                weight: item.weight,
-                selectedMaterial: item.selectedMaterial,
-                selectedSize: item.selectedSize,
-                selectedColor: item.selectedColor,
-              })),
-            },
-            user: {
-              userId: userId || null,
-              userName,
-              userPhone,
-              userAddress,
-              cardHolder,
-              cardExpiry,
-              cardNumber: cardNumber
-                ? cardNumber.replace(/.(?=.{4})/g, "*")
-                : null,
-            },
-            payment: payment
-              ? {
-                  id: payment.id,
-                  status: payment.status,
-                  paid: payment.paid,
-                  confirmationType: payment.confirmation?.type,
-                  confirmationUrl: payment.confirmation?.confirmation_url,
-                  createdAt: payment.created_at,
-                  amount: payment.amount,
-                }
-              : null,
-          },
+          // NOTE: metadata field removed because current Prisma runtime/client
+          // does not support it in this deployed environment.
+          // If you regenerate Prisma client after schema update, you can add it back.
           user: userConnect,
           cart: {
             create: cart.map((item) => ({
