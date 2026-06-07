@@ -10,7 +10,7 @@ const checkout = new YooCheckout({
 
 const PAYMENT_RETURN_URL =
   process.env.PAYMENT_RETURN_URL ||
-  "https://shop-store-dzjw.vercel.app/profile";
+  `${process.env.CLIENT_URL || "http://localhost:3000"}/profile`;
 
 export async function createPayment(orderData) {
   const idempotenceKey = crypto.randomUUID();
@@ -28,7 +28,10 @@ export async function createPayment(orderData) {
     confirmation: {
       type: "redirect",
       return_url: PAYMENT_RETURN_URL,
+      locale: "ru_RU",
     },
+    capture: true,
+    save_payment_method: false,
     metadata: {
       orderNumber: orderData.orderNumber,
       userName: orderData.userName,

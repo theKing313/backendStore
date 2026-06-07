@@ -43,6 +43,15 @@ class OrderService {
       userConnect = { connect: { id: guestUser.id } };
     }
 
+    let payment = null;
+    if (paymentType === "card") {
+      payment = await createPayment({
+        ...orderData,
+        orderNumber,
+        cart,
+      });
+    }
+
     const createdOrder = await prisma.order.create({
       data: {
         orderNumber,
@@ -92,6 +101,17 @@ class OrderService {
               ? cardNumber.replace(/.(?=.{4})/g, "*")
               : null,
           },
+          payment: payment
+            ? {
+                id: payment.id,
+                status: payment.status,
+                paid: payment.paid,
+                confirmationType: payment.confirmation?.type,
+                confirmationUrl: payment.confirmation?.confirmation_url,
+                createdAt: payment.created_at,
+                amount: payment.amount,
+              }
+            : null,
         },
         user: userConnect,
         cart: {
@@ -115,15 +135,7 @@ class OrderService {
       include: { cart: true },
     });
 
-    let paymentUrl = null;
-    if (paymentType === "card") {
-      const payment = await createPayment({
-        ...orderData,
-        orderNumber,
-        cart,
-      });
-      paymentUrl = payment?.confirmation?.confirmation_url;
-    }
+    const paymentUrl = payment?.confirmation?.confirmation_url ?? null;
 
     return {
       ...createdOrder,
