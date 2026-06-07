@@ -147,11 +147,8 @@ router.get("/products/:id", productController.getById);
 router.post("/products", productController.create);
 
 // Server-side file upload endpoint. Expects multipart/form-data with field name `file`.
-// router.post("/upload", upload.single("file"), uploadController.upload);
-router.post("/upload", (req, res) => {
-  console.log("🔥 ROUTE WORKS");
-  res.json({ ok: true });
-});
+router.post("/upload", upload.single("file"), uploadController.upload);
+
 /**
  * @swagger
  * /api/products/{id}:
