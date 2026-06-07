@@ -20,6 +20,7 @@ const supabaseServer = createClient(supabaseUrl, supabaseServiceKey, {
 
 export const uploadController = {
   async upload(req, res) {
+    console.log("🔥 UPLOAD CONTROLLER START");
     try {
       if (!req.file)
         return res.status(400).json({ message: "No file provided" });
