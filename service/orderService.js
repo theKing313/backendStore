@@ -45,20 +45,28 @@ class OrderService {
         console.log("✅ Payment created:", payment);
       }
 
-      const paymentUrl = payment?.confirmation?.confirmation_url ?? null;
+      // --- Сохраняем заказ в БД как раньше ---
+      let userConnect;
+      if (userId) {
+        userConnect = { connect: { id: Number(userId) } };
+      } else {
+        const guestEmail = "guest@purr.store";
+        const guestUser = await prisma.user.upsert({
+          where: { email: guestEmail },
+          update: {},
+          create: {
+            username: "Guest",
+            email: guestEmail,
+            password: await bcrypt.hash("guest-password", 3),
+          },
+        });
+        userConnect = { connect: { id: guestUser.id } };
+      }
 
-      // Возвращаем информацию о платеже с красивой ссылкой на модалку Yookassa
-      const result = {
-        success: true,
-        orderNumber,
-        paymentUrl,
-        paymentId: payment?.id,
-        paymentStatus: payment?.status,
-        amount: payment?.amount,
-        confirmation: payment?.confirmation,
-        // Сохраняем данные заказа в памяти до подтверждения платежа
-        orderData: {
-          userId,
+      const createdOrder = await prisma.order.create({
+        data: {
+          orderNumber,
+          timestamp: new Date(timestamp),
           userName,
           userPhone,
           userAddress,
@@ -68,13 +76,86 @@ class OrderService {
           cardExpiry,
           cardCvv,
           cardHolder,
-          cart,
-          timestamp,
           totalPrice,
           totalWeight,
           totalDiscount,
           totalQuantity,
+          metadata: {
+            order: {
+              orderNumber,
+              paymentType,
+              orderType,
+              totalPrice,
+              totalWeight,
+              totalDiscount,
+              totalQuantity,
+              cart: cart.map((item) => ({
+                productId: item.productId,
+                name: item.name,
+                quantity: item.quantity,
+                price: item.price,
+                totalPrice: item.totalPrice,
+                weight: item.weight,
+                selectedMaterial: item.selectedMaterial,
+                selectedSize: item.selectedSize,
+                selectedColor: item.selectedColor,
+              })),
+            },
+            user: {
+              userId: userId || null,
+              userName,
+              userPhone,
+              userAddress,
+              cardHolder,
+              cardExpiry,
+              cardNumber: cardNumber
+                ? cardNumber.replace(/.(?=.{4})/g, "*")
+                : null,
+            },
+            payment: payment
+              ? {
+                  id: payment.id,
+                  status: payment.status,
+                  paid: payment.paid,
+                  confirmationType: payment.confirmation?.type,
+                  confirmationUrl: payment.confirmation?.confirmation_url,
+                  createdAt: payment.created_at,
+                  amount: payment.amount,
+                }
+              : null,
+          },
+          user: userConnect,
+          cart: {
+            create: cart.map((item) => ({
+              productId: item.productId,
+              name: item.name,
+              quantity: item.quantity,
+              price: item.price,
+              totalPrice: item.totalPrice,
+              weight: item.weight,
+              totalWeight: item.totalWeight,
+              selectedMaterial: item.selectedMaterial,
+              selectedSize: item.selectedSize,
+              selectedColor: item.selectedColor,
+              discountedPrice: item.discountedPrice,
+              discount: item.discount,
+              profit: item.profit,
+            })),
+          },
         },
+        include: { cart: true },
+      });
+
+      const paymentUrl = payment?.confirmation?.confirmation_url ?? null;
+
+      const result = {
+        ...createdOrder,
+        timestamp: createdOrder.timestamp.getTime(),
+        paymentUrl,
+        paymentId: payment?.id,
+        paymentStatus: payment?.status,
+        amount: payment?.amount,
+        confirmation: payment?.confirmation,
       };
 
       console.log("📤 Returning result:", JSON.stringify(result, null, 2));
