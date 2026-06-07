@@ -4,58 +4,14 @@ import { createPayment } from "./paymentService.js";
 
 class OrderService {
   async createOrder(orderData) {
-    const {
-      userId,
-      userName,
-      userPhone,
-      userAddress,
-      paymentType,
-      orderType,
-      cardNumber,
-      cardExpiry,
-      cardCvv,
-      cardHolder,
-      cart,
-      timestamp,
-      totalPrice,
-      totalWeight,
-      totalDiscount,
-      totalQuantity,
-    } = orderData;
+    try {
+      console.log(
+        "🛒 createOrder called with:",
+        JSON.stringify(orderData, null, 2),
+      );
 
-    const orderNumber =
-      Math.floor(Date.now() / 1000) + Math.floor(Math.random() * 90);
-
-    let userConnect;
-    if (userId) {
-      userConnect = { connect: { id: Number(userId) } };
-    } else {
-      const guestEmail = "guest@purr.store";
-      const guestUser = await prisma.user.upsert({
-        where: { email: guestEmail },
-        update: {},
-        create: {
-          username: "Guest",
-          email: guestEmail,
-          password: await bcrypt.hash("guest-password", 3),
-        },
-      });
-      userConnect = { connect: { id: guestUser.id } };
-    }
-
-    let payment = null;
-    if (paymentType === "card") {
-      payment = await createPayment({
-        ...orderData,
-        orderNumber,
-        cart,
-      });
-    }
-
-    const createdOrder = await prisma.order.create({
-      data: {
-        orderNumber,
-        timestamp: new Date(timestamp),
+      const {
+        userId,
         userName,
         userPhone,
         userAddress,
@@ -65,83 +21,70 @@ class OrderService {
         cardExpiry,
         cardCvv,
         cardHolder,
+        cart,
+        timestamp,
         totalPrice,
         totalWeight,
         totalDiscount,
         totalQuantity,
-        metadata: {
-          order: {
-            orderNumber,
-            paymentType,
-            orderType,
-            totalPrice,
-            totalWeight,
-            totalDiscount,
-            totalQuantity,
-            cart: cart.map((item) => ({
-              productId: item.productId,
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price,
-              totalPrice: item.totalPrice,
-              weight: item.weight,
-              selectedMaterial: item.selectedMaterial,
-              selectedSize: item.selectedSize,
-              selectedColor: item.selectedColor,
-            })),
-          },
-          user: {
-            userId: userId || null,
-            userName,
-            userPhone,
-            userAddress,
-            cardHolder,
-            cardExpiry,
-            cardNumber: cardNumber
-              ? cardNumber.replace(/.(?=.{4})/g, "*")
-              : null,
-          },
-          payment: payment
-            ? {
-                id: payment.id,
-                status: payment.status,
-                paid: payment.paid,
-                confirmationType: payment.confirmation?.type,
-                confirmationUrl: payment.confirmation?.confirmation_url,
-                createdAt: payment.created_at,
-                amount: payment.amount,
-              }
-            : null,
-        },
-        user: userConnect,
-        cart: {
-          create: cart.map((item) => ({
-            productId: item.productId,
-            name: item.name,
-            quantity: item.quantity,
-            price: item.price,
-            totalPrice: item.totalPrice,
-            weight: item.weight,
-            totalWeight: item.totalWeight,
-            selectedMaterial: item.selectedMaterial,
-            selectedSize: item.selectedSize,
-            selectedColor: item.selectedColor,
-            discountedPrice: item.discountedPrice,
-            discount: item.discount,
-            profit: item.profit,
-          })),
-        },
-      },
-      include: { cart: true },
-    });
+      } = orderData;
 
-    const paymentUrl = payment?.confirmation?.confirmation_url ?? null;
+      const orderNumber =
+        Math.floor(Date.now() / 1000) + Math.floor(Math.random() * 90);
 
-    return {
-      ...createdOrder,
-      timestamp: createdOrder.timestamp.getTime(),
-      paymentUrl,
-    };
+      console.log("💳 Payment type:", paymentType);
+
+      let payment = null;
+      if (paymentType === "card") {
+        console.log("💳 Creating payment...");
+        payment = await createPayment({
+          ...orderData,
+          orderNumber,
+          cart,
+        });
+        console.log("✅ Payment created:", payment);
+      }
+
+      const paymentUrl = payment?.confirmation?.confirmation_url ?? null;
+
+      // Возвращаем информацию о платеже с красивой ссылкой на модалку Yookassa
+      const result = {
+        success: true,
+        orderNumber,
+        paymentUrl,
+        paymentId: payment?.id,
+        paymentStatus: payment?.status,
+        amount: payment?.amount,
+        confirmation: payment?.confirmation,
+        // Сохраняем данные заказа в памяти до подтверждения платежа
+        orderData: {
+          userId,
+          userName,
+          userPhone,
+          userAddress,
+          paymentType,
+          orderType,
+          cardNumber,
+          cardExpiry,
+          cardCvv,
+          cardHolder,
+          cart,
+          timestamp,
+          totalPrice,
+          totalWeight,
+          totalDiscount,
+          totalQuantity,
+        },
+      };
+
+      console.log("📤 Returning result:", JSON.stringify(result, null, 2));
+      return result;
+    } catch (error) {
+      console.error("❌ Error in createOrder:", error);
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+      throw error;
+    }
   }
 
   async getAllOrders() {
