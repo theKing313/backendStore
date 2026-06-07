@@ -5,6 +5,13 @@ import { reviewController } from "../controllers/reviewController.js";
 import { productController } from "../controllers/productController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { prisma } from "../prisma.js";
+import multer from "multer";
+import { uploadController } from "../controllers/uploadController.js";
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+});
 
 const router = express.Router();
 /**
@@ -138,6 +145,9 @@ router.get("/products/:id", productController.getById);
  *         description: Товар создан
  */
 router.post("/products", productController.create);
+
+// Server-side file upload endpoint. Expects multipart/form-data with field name `file`.
+router.post("/upload", upload.single("file"), uploadController.upload);
 
 /**
  * @swagger
