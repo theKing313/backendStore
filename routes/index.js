@@ -3,6 +3,7 @@ import { userController } from "../controllers/userController.js";
 import { orderController } from "../controllers/orderController.js";
 import { reviewController } from "../controllers/reviewController.js";
 import { productController } from "../controllers/productController.js";
+import { supportController } from "../controllers/supportController.js";
 import { authMiddleware } from "../middleware/authMiddleware.js";
 import { prisma } from "../prisma.js";
 import multer from "multer";
@@ -421,6 +422,9 @@ router.patch("/orders/:id/status", orderController.updateStatus);
  *         description: Отзыв успешно создан
  */
 router.post("/reviews", reviewController.create);
+
+router.post("/support_messages", supportController.create);
+router.get("/support_messages", supportController.getAll);
 
 /**
  * @swagger

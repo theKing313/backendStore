@@ -10,7 +10,7 @@ const checkout = new YooCheckout({
 
 const PAYMENT_RETURN_URL =
   process.env.PAYMENT_RETURN_URL ||
-  `${process.env.CLIENT_URL || "http://localhost:3000"}/profile`;
+  `${process.env.CLIENT_URL || "https://shop-store-dzjw.vercel.app"}/profile`;
 
 export async function createPayment(orderData) {
   try {
