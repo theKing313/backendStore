@@ -290,6 +290,64 @@ router.get("/categories", async (req, res) => {
   }
 });
 
+router.post("/categories", async (req, res) => {
+  try {
+    const { id, name, url } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ message: "Category name is required" });
+    }
+
+    const category = await prisma.category.create({
+      data: {
+        id: id || Date.now().toString(),
+        name,
+        url: url || "",
+      },
+    });
+
+    return res.status(201).json(category);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to create category" });
+  }
+});
+
+router.put("/categories/:id", async (req, res) => {
+  try {
+    const { name, url } = req.body;
+    const { id } = req.params;
+
+    if (!name) {
+      return res.status(400).json({ message: "Category name is required" });
+    }
+
+    const updatedCategory = await prisma.category.update({
+      where: { id },
+      data: {
+        name,
+        url: url || "",
+      },
+    });
+
+    return res.json(updatedCategory);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to update category" });
+  }
+});
+
+router.delete("/categories/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.category.delete({ where: { id } });
+    return res.json({ id });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to delete category" });
+  }
+});
+
 router.get("/genders", async (req, res) => {
   try {
     const genders = await prisma.gender.findMany();
