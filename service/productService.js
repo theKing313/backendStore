@@ -45,14 +45,15 @@ class ProductService {
     const colorImages = productData.colorImages || {};
     // Fallback: если есть старое поле image, использовать его
     const mainImage = productData.image || "";
-
+    console.log("productData.gender =", productData.gender);
+    console.log("genderId =", genderId);
     return prisma.product.create({
       data: {
         id,
         name: productData.name,
         description: productData.description,
         image: mainImage,
-        // colorImages,
+        colorImages,
         price: Number(productData.price) || 0,
         weight: Number(productData.weight) || 0,
         sizes: productData.sizes ?? [],
