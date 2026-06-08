@@ -51,7 +51,7 @@ export async function createPayment(orderData) {
         orderType: orderData.orderType,
         totalPrice: orderData.totalPrice,
         totalQuantity: orderData.totalQuantity,
-        cart: JSON.stringify(orderData.cart),
+        cartItems: Array.isArray(orderData.cart) ? orderData.cart.length : 0,
         userId: orderData.userId || null,
       },
     };
