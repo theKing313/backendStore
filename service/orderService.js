@@ -138,14 +138,9 @@ class OrderService {
     }
   }
 
-  async getAllOrders() {
-    // const peeeeeeeeeeeeeee = prisma;
-    // return { test: JSON.stringify(peeeeeeeeeeeeeee.order) };
-    // const orders = await prisma.order.findMany({
-    //   include: { cart: true },
-    //   orderBy: { createdAt: "desc" },
-    // });
+  async getAllOrders(userId) {
     const orders = await prisma.order.findMany({
+      where: userId ? { userId } : undefined,
       include: { cart: true },
       orderBy: { createdAt: "desc" },
     });

@@ -20,7 +20,10 @@ class OrderController {
 
   async getAll(req, res) {
     try {
-      const orders = await orderService.getAllOrders();
+      const { userId } = req.query;
+      const orders = await orderService.getAllOrders(
+        userId ? Number(userId) : undefined,
+      );
       return res.json(orders);
     } catch (error) {
       console.error(error);
