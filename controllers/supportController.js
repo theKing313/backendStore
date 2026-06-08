@@ -7,7 +7,7 @@ export const supportController = {
       if (!content)
         return res.status(400).json({ message: "content is required" });
 
-      const message = await prisma.supportMessage.create({
+      const message = await prisma.SupportMessage.create({
         data: {
           userId: userId || null,
           orderId: orderId || null,
@@ -28,7 +28,7 @@ export const supportController = {
     try {
       const { orderId } = req.query;
       const where = orderId ? { where: { orderId } } : {};
-      const messages = await prisma.supportMessage.findMany({
+      const messages = await prisma.SupportMessage.findMany({
         orderBy: { createdAt: "asc" },
         ...(orderId ? { where: { orderId } } : {}),
       });
