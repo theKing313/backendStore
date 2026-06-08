@@ -37,7 +37,19 @@ app.use(express.json());
 // app.use("/users", userRouter); // http://localhost/users
 app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api", router);
-//
+
+if (process.env.NODE_ENV !== "production") {
+  app.get("/api/seed-database", async (req, res) => {
+    try {
+      await seedDatabase();
+      return res.json({ message: "Seed database completed." });
+    } catch (error) {
+      console.error("Seed database failed:", error);
+      return res.status(500).json({ message: "Seed database failed." });
+    }
+  });
+}
+
 app.post("/api/create-payment", async (req, res) => {
   try {
     const payment = await createPayment(req.body);
