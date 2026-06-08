@@ -220,6 +220,66 @@ router.get("/brands", async (req, res) => {
   }
 });
 
+router.post("/brands", async (req, res) => {
+  try {
+    const { id, name, description, url } = req.body;
+
+    if (!name) {
+      return res.status(400).json({ message: "Brand name is required" });
+    }
+
+    const brand = await prisma.brand.create({
+      data: {
+        id: id || Date.now().toString(),
+        name,
+        description: description || "",
+        url: url || "",
+      },
+    });
+
+    return res.status(201).json(brand);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to create brand" });
+  }
+});
+
+router.put("/brands/:id", async (req, res) => {
+  try {
+    const { name, description, url } = req.body;
+    const { id } = req.params;
+
+    if (!name) {
+      return res.status(400).json({ message: "Brand name is required" });
+    }
+
+    const updatedBrand = await prisma.brand.update({
+      where: { id },
+      data: {
+        name,
+        description: description || "",
+        url: url || "",
+      },
+    });
+
+    return res.json(updatedBrand);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to update brand" });
+  }
+});
+
+router.delete("/brands/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    await prisma.brand.delete({ where: { id } });
+    return res.json({ id });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Failed to delete brand" });
+  }
+});
+
 router.get("/categories", async (req, res) => {
   try {
     const categories = await prisma.category.findMany();
