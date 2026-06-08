@@ -85,6 +85,7 @@ model OrderItem {
   discountedPrice  Float?
   discount         Int?
   profit           Float?
+  colorImages      Json    @default("{}")
 }
 
 model Review {

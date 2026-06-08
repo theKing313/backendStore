@@ -85,21 +85,32 @@ class OrderService {
           // If you regenerate Prisma client after schema update, you can add it back.
           user: userConnect,
           cart: {
-            create: cart.map((item) => ({
-              productId: item.productId,
-              name: item.name,
-              quantity: item.quantity,
-              price: item.price,
-              totalPrice: item.totalPrice,
-              weight: item.weight,
-              totalWeight: item.totalWeight,
-              selectedMaterial: item.selectedMaterial,
-              selectedSize: item.selectedSize,
-              selectedColor: item.selectedColor,
-              discountedPrice: item.discountedPrice,
-              discount: item.discount,
-              profit: item.profit,
-            })),
+            create: await Promise.all(
+              cart.map(async (item) => {
+                // Получаем товар из БД чтобы взять colorImages
+                const product = await prisma.product.findUnique({
+                  where: { id: item.productId },
+                  select: { colorImages: true },
+                });
+
+                return {
+                  productId: item.productId,
+                  name: item.name,
+                  quantity: item.quantity,
+                  price: item.price,
+                  totalPrice: item.totalPrice,
+                  weight: item.weight,
+                  totalWeight: item.totalWeight,
+                  selectedMaterial: item.selectedMaterial,
+                  selectedSize: item.selectedSize,
+                  selectedColor: item.selectedColor,
+                  discountedPrice: item.discountedPrice,
+                  discount: item.discount,
+                  profit: item.profit,
+                  colorImages: product?.colorImages || {},
+                };
+              }),
+            ),
           },
         },
         include: { cart: true },
