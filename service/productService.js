@@ -52,7 +52,7 @@ class ProductService {
         name: productData.name,
         description: productData.description,
         image: mainImage,
-        colorImages,
+        // colorImages,
         price: Number(productData.price) || 0,
         weight: Number(productData.weight) || 0,
         sizes: productData.sizes ?? [],
