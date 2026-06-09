@@ -15,8 +15,7 @@ import { swaggerSpec } from "./swagger.js";
 import { createPayment } from "./service/paymentService.js";
 
 const app = express();
-const port = 5044;
-
+const port = process.env.PORT || 5044;
 // app.use(cors({ exposedHeaders: ["captcha-token"] }));
 
 // export const prisma = new PrismaClient();
@@ -198,8 +197,8 @@ async function startServer() {
     console.error("Seed database failed:", error);
   }
 
-  app.listen(port, () => {
-    console.log(`Captcha API запущен на http://localhost:${port}`);
+  app.listen(port, "0.0.0.0", () => {
+    console.log(`Server started on port ${port}`);
   });
 }
 
