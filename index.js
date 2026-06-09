@@ -191,11 +191,11 @@ async function seedDatabase() {
 }
 
 async function startServer() {
-  try {
-    await seedDatabase();
-  } catch (error) {
-    console.error("Seed database failed:", error);
-  }
+  // try {
+  //   // await seedDatabase();
+  // } catch (error) {
+  //   console.error("Seed database failed:", error);
+  // }
 
   app.listen(port, "0.0.0.0", () => {
     console.log(`Server started on port ${port}`);
